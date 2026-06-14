@@ -1,6 +1,6 @@
 "use strict";
 
-const CACHE_NAME = "neon-break-v1";
+const CACHE_NAME = "neon-break-v2";
 const APP_SHELL = [
   "./",
   "./index.html",
