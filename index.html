@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#10182b">
+  <meta name="description" content="指一本で遊べる、オフライン対応のスマホ向けブロック崩し。">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="NEON BREAK">
+  <title>NEON BREAK - ブロック崩し</title>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icons/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="./icons/icon-maskable.svg">
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <main class="app-shell">
+    <header class="topbar">
+      <div class="brand" aria-label="NEON BREAK ブロック崩し">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <div>
+          <p class="eyebrow">POCKET ARCADE</p>
+          <h1>NEON BREAK</h1>
+        </div>
+      </div>
+      <button id="soundButton" class="icon-button" type="button" aria-pressed="false" aria-label="サウンドをオンにする">
+        <span aria-hidden="true">♪</span>
+      </button>
+    </header>
+
+    <section class="scoreboard" aria-label="ゲーム情報">
+      <div class="stat">
+        <span class="stat-label">スコア</span>
+        <strong id="scoreValue">000000</strong>
+      </div>
+      <div class="stat stat-center">
+        <span class="stat-label">レベル</span>
+        <strong id="levelValue">01</strong>
+      </div>
+      <div class="stat stat-right">
+        <span class="stat-label">ライフ</span>
+        <strong id="livesValue" aria-label="3">● ● ●</strong>
+      </div>
+    </section>
+
+    <section class="game-frame" aria-label="ゲーム画面">
+      <canvas id="gameCanvas" width="720" height="1080" aria-label="ブロック崩しゲーム。左右に操作してボールを打ち返します。" tabindex="0"></canvas>
+
+      <div id="startOverlay" class="overlay">
+        <div class="overlay-card">
+          <p class="kicker">READY?</p>
+          <h2>光を、打ち返せ。</h2>
+          <p>パドルを左右に動かして、すべてのブロックを壊そう。</p>
+          <button id="startButton" class="primary-button" type="button">ゲーム開始</button>
+          <p class="controls-hint"><span>指でドラッグ</span><span>または ← → キー</span></p>
+        </div>
+      </div>
+
+      <div id="pauseOverlay" class="overlay hidden">
+        <div class="overlay-card compact">
+          <p class="kicker">PAUSED</p>
+          <h2>一時停止中</h2>
+          <button id="resumeButton" class="primary-button" type="button">ゲームに戻る</button>
+        </div>
+      </div>
+
+      <div id="resultOverlay" class="overlay hidden">
+        <div class="overlay-card">
+          <p id="resultKicker" class="kicker">GAME OVER</p>
+          <h2 id="resultTitle">もう一度、挑戦。</h2>
+          <div class="result-score">
+            <span>今回のスコア</span>
+            <strong id="finalScore">000000</strong>
+          </div>
+          <p id="highScoreNote" class="high-score-note">ベストスコア 000000</p>
+          <button id="retryButton" class="primary-button" type="button">再挑戦</button>
+        </div>
+      </div>
+    </section>
+
+    <footer class="bottom-panel">
+      <div>
+        <span class="stat-label">ベスト</span>
+        <strong id="highScoreValue">000000</strong>
+      </div>
+      <button id="pauseButton" class="secondary-button" type="button" disabled>
+        <span aria-hidden="true">Ⅱ</span>
+        一時停止
+      </button>
+    </footer>
+
+    <p id="liveStatus" class="sr-only" role="status" aria-live="polite"></p>
+    <noscript>このゲームを遊ぶにはJavaScriptを有効にしてください。</noscript>
+  </main>
+  <script src="./game.js" defer></script>
+</body>
+</html>
