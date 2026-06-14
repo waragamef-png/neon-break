@@ -1,0 +1,41 @@
+{
+  "name": "NEON BREAK - ブロック崩し",
+  "short_name": "NEON BREAK",
+  "description": "指一本で遊べる、オフライン対応のスマホ向けブロック崩し。",
+  "lang": "ja",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#080d19",
+  "theme_color": "#10182b",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-maskable.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "すぐに遊ぶ",
+      "short_name": "ゲーム開始",
+      "url": "./",
+      "icons": [
+        {
+          "src": "./icons/icon.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ]
+}
