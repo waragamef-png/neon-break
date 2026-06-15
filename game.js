@@ -22,11 +22,18 @@ const ui = {
   resume: document.getElementById("resumeButton"),
   retry: document.getElementById("retryButton"),
   sound: document.getElementById("soundButton"),
-  connection: document.getElementById("connectionStatus")
+  connection: document.getElementById("connectionStatus"),
+  brickType: document.getElementById("brickTypeValue")
 };
 
 const WORLD = { width: 720, height: 1080 };
 const COLORS = ["#51e7ff", "#6d9cff", "#9b7bff", "#ff5dba", "#ff9c66"];
+const BRICK_TYPES = [
+  { id: "classic", label: "ブロック" },
+  { id: "animal", label: "動物" },
+  { id: "idol", label: "アイドル" }
+];
+const ANIMALS = ["cat", "dog", "bear", "rabbit", "panda", "fox", "frog", "pig"];
 const IDOL_COUNT = 8;
 const STORAGE_KEY = "neon-break-high-score";
 const SOUND_KEY = "neon-break-sound";
@@ -90,8 +97,11 @@ function announce(message) {
 }
 
 function updateUI() {
+  const brickType = BRICK_TYPES[(state.level - 1) % BRICK_TYPES.length];
   ui.score.textContent = formatScore(state.score);
   ui.level.textContent = state.level.toString().padStart(2, "0");
+  ui.brickType.textContent = brickType.label;
+  ui.brickType.dataset.type = brickType.id;
   ui.lives.textContent = Array.from({ length: state.lives }, () => "●").join(" ");
   ui.lives.setAttribute("aria-label", `${state.lives}`);
   ui.highScore.textContent = formatScore(state.highScore);
@@ -103,6 +113,7 @@ function setOverlay(element, visible) {
 }
 
 function configureLevel() {
+  const brickType = BRICK_TYPES[(state.level - 1) % BRICK_TYPES.length].id;
   const columns = 8;
   const rows = Math.min(5 + state.level, 9);
   const gap = 10;
@@ -125,6 +136,8 @@ function configureLevel() {
         strength,
         maxStrength: strength,
         color: COLORS[(row + state.level - 1) % COLORS.length],
+        type: brickType,
+        animal: ANIMALS[(row * 3 + column + state.level - 1) % ANIMALS.length],
         idol: (row * 3 + column + state.level - 1) % IDOL_COUNT,
         alive: true
       });
@@ -215,7 +228,8 @@ function nextLevel() {
   configureLevel();
   resetPaddleAndBall();
   updateUI();
-  announce(`レベル${state.level}。`);
+  const brickType = BRICK_TYPES[(state.level - 1) % BRICK_TYPES.length].label;
+  announce(`レベル${state.level}。${brickType}ステージ。`);
   beep(660, 0.09, "triangle", 0.05);
   window.setTimeout(launchBall, 700);
 }
@@ -387,7 +401,204 @@ function drawBackground() {
 function drawBricks() {
   for (const brick of state.bricks) {
     if (!brick.alive) continue;
-    drawIdolBrick(brick);
+    if (brick.type === "animal") {
+      drawAnimalBrick(brick);
+    } else if (brick.type === "idol") {
+      drawIdolBrick(brick);
+    } else {
+      drawClassicBrick(brick);
+    }
+  }
+}
+
+function drawClassicBrick(brick) {
+  const damaged = brick.strength < brick.maxStrength;
+
+  ctx.save();
+  ctx.globalAlpha = damaged ? 0.72 : 1;
+  ctx.shadowColor = brick.color;
+  ctx.shadowBlur = damaged ? 6 : 15;
+  const gradient = ctx.createLinearGradient(brick.x, brick.y, brick.x, brick.y + brick.height);
+  gradient.addColorStop(0, "#eefcff");
+  gradient.addColorStop(0.18, brick.color);
+  gradient.addColorStop(1, "#18233c");
+  ctx.fillStyle = gradient;
+  roundedRect(brick.x, brick.y, brick.width, brick.height, 9);
+  ctx.fill();
+
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = "rgba(255,255,255,0.32)";
+  roundedRect(brick.x + 5, brick.y + 4, brick.width - 10, 5, 3);
+  ctx.fill();
+  ctx.lineWidth = damaged ? 2.5 : 1.5;
+  ctx.strokeStyle = damaged ? "rgba(255, 88, 125, 0.95)" : "rgba(255,255,255,0.7)";
+  roundedRect(brick.x, brick.y, brick.width, brick.height, 9);
+  ctx.stroke();
+
+  if (damaged) drawBrickCrack(brick);
+  ctx.restore();
+}
+
+function drawAnimalBrick(brick) {
+  const cx = brick.x + brick.width / 2;
+  const cy = brick.y + brick.height / 2 + 1;
+  const damaged = brick.strength < brick.maxStrength;
+  const scale = Math.min(brick.width / 72, brick.height / 40);
+
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.scale(scale, scale);
+  ctx.globalAlpha = damaged ? 0.7 : 1;
+  ctx.shadowColor = brick.color;
+  ctx.shadowBlur = damaged ? 7 : 13;
+
+  const faceColors = {
+    cat: ["#f6c56f", "#fff1cf"],
+    dog: ["#c98d5b", "#f8dfb4"],
+    bear: ["#9c6948", "#e8c49a"],
+    rabbit: ["#e9e6ff", "#ffffff"],
+    panda: ["#f4f5fb", "#ffffff"],
+    fox: ["#ed874e", "#fff0d7"],
+    frog: ["#71cf78", "#d7f49d"],
+    pig: ["#f59ab5", "#ffd5df"]
+  };
+  const [base, muzzle] = faceColors[brick.animal];
+
+  drawAnimalEars(brick.animal, base);
+  ctx.fillStyle = base;
+  roundedRect(-29, -16, 58, 33, brick.animal === "frog" ? 11 : 15);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.lineWidth = 1.5;
+  ctx.strokeStyle = "rgba(255,255,255,0.72)";
+  ctx.stroke();
+  drawAnimalFeatures(brick.animal, muzzle, damaged);
+  ctx.restore();
+}
+
+function drawAnimalEars(animal, color) {
+  ctx.fillStyle = color;
+  ctx.beginPath();
+
+  if (animal === "cat" || animal === "fox") {
+    ctx.moveTo(-25, -11);
+    ctx.lineTo(-20, -26);
+    ctx.lineTo(-9, -15);
+    ctx.moveTo(25, -11);
+    ctx.lineTo(20, -26);
+    ctx.lineTo(9, -15);
+  } else if (animal === "rabbit") {
+    ctx.ellipse(-15, -25, 7, 17, -0.12, 0, Math.PI * 2);
+    ctx.moveTo(22, -25);
+    ctx.ellipse(15, -25, 7, 17, 0.12, 0, Math.PI * 2);
+  } else if (animal === "frog") {
+    ctx.arc(-19, -17, 9, 0, Math.PI * 2);
+    ctx.moveTo(28, -17);
+    ctx.arc(19, -17, 9, 0, Math.PI * 2);
+  } else {
+    ctx.arc(-21, -14, 9, 0, Math.PI * 2);
+    ctx.moveTo(30, -14);
+    ctx.arc(21, -14, 9, 0, Math.PI * 2);
+  }
+  ctx.fill();
+}
+
+function drawAnimalFeatures(animal, muzzle, damaged) {
+  const eyeY = animal === "frog" ? -8 : -5;
+
+  if (animal === "panda") {
+    ctx.fillStyle = "#2c3140";
+    ctx.beginPath();
+    ctx.ellipse(-13, eyeY, 8, 7, -0.25, 0, Math.PI * 2);
+    ctx.ellipse(13, eyeY, 8, 7, 0.25, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.strokeStyle = "#263143";
+  ctx.fillStyle = "#263143";
+  ctx.lineWidth = 2.2;
+  ctx.lineCap = "round";
+
+  if (damaged) {
+    ctx.beginPath();
+    ctx.moveTo(-17, eyeY - 2);
+    ctx.lineTo(-10, eyeY + 2);
+    ctx.moveTo(-10, eyeY - 2);
+    ctx.lineTo(-17, eyeY + 2);
+    ctx.stroke();
+  } else {
+    ctx.beginPath();
+    ctx.arc(-13, eyeY, 2.4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.arc(13, eyeY, 2.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (animal === "dog") {
+    ctx.fillStyle = "#815339";
+    ctx.beginPath();
+    ctx.ellipse(-27, -4, 7, 12, 0.2, 0, Math.PI * 2);
+    ctx.ellipse(27, -4, 7, 12, -0.2, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.fillStyle = muzzle;
+  if (animal === "pig") {
+    ctx.beginPath();
+    ctx.ellipse(0, 8, 12, 7, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#b85e7a";
+    ctx.beginPath();
+    ctx.arc(-4, 8, 1.7, 0, Math.PI * 2);
+    ctx.arc(4, 8, 1.7, 0, Math.PI * 2);
+    ctx.fill();
+    return;
+  }
+
+  ctx.beginPath();
+  ctx.ellipse(0, 7, 13, 8, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  if (animal === "rabbit") {
+    ctx.fillStyle = "#ef8eaa";
+  } else if (animal === "frog") {
+    ctx.strokeStyle = "#315b42";
+    ctx.beginPath();
+    ctx.arc(0, 4, 9, 0.15, Math.PI - 0.15);
+    ctx.stroke();
+    return;
+  } else {
+    ctx.fillStyle = "#3a3040";
+  }
+
+  ctx.beginPath();
+  ctx.moveTo(-4, 3);
+  ctx.lineTo(4, 3);
+  ctx.lineTo(0, 7);
+  ctx.closePath();
+  ctx.fill();
+  ctx.strokeStyle = "#3a3040";
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.moveTo(0, 7);
+  ctx.quadraticCurveTo(-4, 11, -8, 9);
+  ctx.moveTo(0, 7);
+  ctx.quadraticCurveTo(4, 11, 8, 9);
+  ctx.stroke();
+
+  if (animal === "cat") {
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    ctx.moveTo(-9, 6);
+    ctx.lineTo(-23, 3);
+    ctx.moveTo(-9, 9);
+    ctx.lineTo(-23, 11);
+    ctx.moveTo(9, 6);
+    ctx.lineTo(23, 3);
+    ctx.moveTo(9, 9);
+    ctx.lineTo(23, 11);
+    ctx.stroke();
   }
 }
 
@@ -429,14 +640,7 @@ function drawIdolBrick(brick) {
   ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
 
   if (damaged) {
-    ctx.strokeStyle = "rgba(255, 88, 125, 0.95)";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(brick.x + brick.width * 0.45, brick.y);
-    ctx.lineTo(brick.x + brick.width * 0.53, brick.y + brick.height * 0.35);
-    ctx.lineTo(brick.x + brick.width * 0.42, brick.y + brick.height * 0.58);
-    ctx.lineTo(brick.x + brick.width * 0.58, brick.y + brick.height);
-    ctx.stroke();
+    drawBrickCrack(brick);
   }
 
   ctx.restore();
@@ -448,6 +652,17 @@ function drawIdolBrick(brick) {
   roundedRect(brick.x, brick.y, brick.width, brick.height, 10);
   ctx.stroke();
   ctx.restore();
+}
+
+function drawBrickCrack(brick) {
+  ctx.strokeStyle = "rgba(255, 88, 125, 0.95)";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(brick.x + brick.width * 0.45, brick.y);
+  ctx.lineTo(brick.x + brick.width * 0.53, brick.y + brick.height * 0.35);
+  ctx.lineTo(brick.x + brick.width * 0.42, brick.y + brick.height * 0.58);
+  ctx.lineTo(brick.x + brick.width * 0.58, brick.y + brick.height);
+  ctx.stroke();
 }
 
 function drawPaddle() {

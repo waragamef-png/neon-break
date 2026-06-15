@@ -175,6 +175,22 @@ button {
   letter-spacing: 0.08em;
 }
 
+.brick-type {
+  margin-top: 1px;
+  color: var(--cyan);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+}
+
+.brick-type[data-type="animal"] {
+  color: #ffd37a;
+}
+
+.brick-type[data-type="idol"] {
+  color: #ff8dd0;
+}
+
 #livesValue {
   color: var(--pink);
   font-size: 0.75rem;
