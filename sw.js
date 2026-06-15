@@ -1,11 +1,12 @@
 "use strict";
 
-const CACHE_NAME = "neon-break-v2";
+const CACHE_NAME = "neon-break-v3";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./game.js",
+  "./assets/idol-faces.jpg",
   "./manifest.webmanifest",
   "./icons/icon.svg",
   "./icons/icon-maskable.svg"
@@ -40,7 +41,7 @@ self.addEventListener("fetch", (event) => {
           caches.open(CACHE_NAME).then((cache) => cache.put("./index.html", copy));
           return response;
         })
-        .catch(() => caches.match("./index.html"))
+        .catch(() => caches.match("./index.html", { ignoreSearch: true }))
     );
     return;
   }

@@ -21,14 +21,21 @@ const ui = {
   pause: document.getElementById("pauseButton"),
   resume: document.getElementById("resumeButton"),
   retry: document.getElementById("retryButton"),
-  sound: document.getElementById("soundButton")
+  sound: document.getElementById("soundButton"),
+  connection: document.getElementById("connectionStatus")
 };
 
 const WORLD = { width: 720, height: 1080 };
 const COLORS = ["#51e7ff", "#6d9cff", "#9b7bff", "#ff5dba", "#ff9c66"];
-const ANIMALS = ["cat", "dog", "bear", "rabbit", "panda", "fox", "frog", "pig"];
+const IDOL_COUNT = 8;
 const STORAGE_KEY = "neon-break-high-score";
 const SOUND_KEY = "neon-break-sound";
+const idolFaces = new Image();
+idolFaces.decoding = "async";
+idolFaces.addEventListener("load", () => {
+  draw();
+});
+idolFaces.src = "./assets/idol-faces.jpg";
 
 const state = {
   mode: "ready",
@@ -118,7 +125,7 @@ function configureLevel() {
         strength,
         maxStrength: strength,
         color: COLORS[(row + state.level - 1) % COLORS.length],
-        animal: ANIMALS[(row * 3 + column + state.level - 1) % ANIMALS.length],
+        idol: (row * 3 + column + state.level - 1) % IDOL_COUNT,
         alive: true
       });
     }
@@ -380,173 +387,67 @@ function drawBackground() {
 function drawBricks() {
   for (const brick of state.bricks) {
     if (!brick.alive) continue;
-    drawAnimalBrick(brick);
+    drawIdolBrick(brick);
   }
 }
 
-function drawAnimalBrick(brick) {
-  const cx = brick.x + brick.width / 2;
-  const cy = brick.y + brick.height / 2 + 1;
+function drawIdolBrick(brick) {
   const damaged = brick.strength < brick.maxStrength;
-  const scale = Math.min(brick.width / 72, brick.height / 40);
 
   ctx.save();
-  ctx.translate(cx, cy);
-  ctx.scale(scale, scale);
   ctx.globalAlpha = damaged ? 0.7 : 1;
   ctx.shadowColor = brick.color;
   ctx.shadowBlur = damaged ? 7 : 13;
-
-  const faceColors = {
-    cat: ["#f6c56f", "#fff1cf"],
-    dog: ["#c98d5b", "#f8dfb4"],
-    bear: ["#9c6948", "#e8c49a"],
-    rabbit: ["#e9e6ff", "#ffffff"],
-    panda: ["#f4f5fb", "#ffffff"],
-    fox: ["#ed874e", "#fff0d7"],
-    frog: ["#71cf78", "#d7f49d"],
-    pig: ["#f59ab5", "#ffd5df"]
-  };
-  const [base, muzzle] = faceColors[brick.animal];
-
-  drawAnimalEars(brick.animal, base);
-
-  ctx.fillStyle = base;
-  roundedRect(-29, -16, 58, 33, brick.animal === "frog" ? 11 : 15);
+  roundedRect(brick.x, brick.y, brick.width, brick.height, 10);
+  ctx.clip();
+  ctx.fillStyle = "#18233c";
   ctx.fill();
-  ctx.shadowBlur = 0;
-  ctx.lineWidth = 1.5;
-  ctx.strokeStyle = "rgba(255,255,255,0.72)";
-  ctx.stroke();
 
-  drawAnimalFeatures(brick.animal, muzzle, damaged);
-  ctx.restore();
-}
-
-function drawAnimalEars(animal, color) {
-  ctx.fillStyle = color;
-  ctx.beginPath();
-
-  if (animal === "cat" || animal === "fox") {
-    ctx.moveTo(-25, -11);
-    ctx.lineTo(-20, -26);
-    ctx.lineTo(-9, -15);
-    ctx.moveTo(25, -11);
-    ctx.lineTo(20, -26);
-    ctx.lineTo(9, -15);
-  } else if (animal === "rabbit") {
-    ctx.ellipse(-15, -25, 7, 17, -0.12, 0, Math.PI * 2);
-    ctx.moveTo(22, -25);
-    ctx.ellipse(15, -25, 7, 17, 0.12, 0, Math.PI * 2);
-  } else if (animal === "frog") {
-    ctx.arc(-19, -17, 9, 0, Math.PI * 2);
-    ctx.moveTo(28, -17);
-    ctx.arc(19, -17, 9, 0, Math.PI * 2);
-  } else {
-    ctx.arc(-21, -14, 9, 0, Math.PI * 2);
-    ctx.moveTo(30, -14);
-    ctx.arc(21, -14, 9, 0, Math.PI * 2);
-  }
-  ctx.fill();
-}
-
-function drawAnimalFeatures(animal, muzzle, damaged) {
-  const eyeY = animal === "frog" ? -8 : -5;
-
-  if (animal === "panda") {
-    ctx.fillStyle = "#2c3140";
-    ctx.beginPath();
-    ctx.ellipse(-13, eyeY, 8, 7, -0.25, 0, Math.PI * 2);
-    ctx.ellipse(13, eyeY, 8, 7, 0.25, 0, Math.PI * 2);
-    ctx.fill();
+  if (idolFaces.complete && idolFaces.naturalWidth > 0) {
+    const sourceWidth = idolFaces.naturalWidth / 4;
+    const sourceHeight = idolFaces.naturalHeight / 2;
+    const sourceX = (brick.idol % 4) * sourceWidth;
+    const sourceY = Math.floor(brick.idol / 4) * sourceHeight;
+    ctx.drawImage(
+      idolFaces,
+      sourceX,
+      sourceY + sourceHeight * 0.08,
+      sourceWidth,
+      sourceHeight * 0.62,
+      brick.x,
+      brick.y,
+      brick.width,
+      brick.height
+    );
   }
 
-  ctx.strokeStyle = "#263143";
-  ctx.fillStyle = "#263143";
-  ctx.lineWidth = 2.2;
-  ctx.lineCap = "round";
+  const shade = ctx.createLinearGradient(brick.x, brick.y, brick.x, brick.y + brick.height);
+  shade.addColorStop(0, "rgba(255,255,255,0.12)");
+  shade.addColorStop(0.55, "rgba(0,0,0,0)");
+  shade.addColorStop(1, damaged ? "rgba(115,0,22,0.58)" : "rgba(6,10,22,0.25)");
+  ctx.fillStyle = shade;
+  ctx.fillRect(brick.x, brick.y, brick.width, brick.height);
 
   if (damaged) {
+    ctx.strokeStyle = "rgba(255, 88, 125, 0.95)";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(-17, eyeY - 2);
-    ctx.lineTo(-10, eyeY + 2);
-    ctx.moveTo(-10, eyeY - 2);
-    ctx.lineTo(-17, eyeY + 2);
+    ctx.moveTo(brick.x + brick.width * 0.45, brick.y);
+    ctx.lineTo(brick.x + brick.width * 0.53, brick.y + brick.height * 0.35);
+    ctx.lineTo(brick.x + brick.width * 0.42, brick.y + brick.height * 0.58);
+    ctx.lineTo(brick.x + brick.width * 0.58, brick.y + brick.height);
     ctx.stroke();
-  } else {
-    ctx.beginPath();
-    ctx.arc(-13, eyeY, 2.4, 0, Math.PI * 2);
-    ctx.fill();
-  }
-  ctx.beginPath();
-  ctx.arc(13, eyeY, 2.4, 0, Math.PI * 2);
-  ctx.fill();
-
-  if (animal === "dog") {
-    ctx.fillStyle = "#815339";
-    ctx.beginPath();
-    ctx.ellipse(-27, -4, 7, 12, 0.2, 0, Math.PI * 2);
-    ctx.ellipse(27, -4, 7, 12, -0.2, 0, Math.PI * 2);
-    ctx.fill();
   }
 
-  ctx.fillStyle = muzzle;
-  if (animal === "pig") {
-    ctx.beginPath();
-    ctx.ellipse(0, 8, 12, 7, 0, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.fillStyle = "#b85e7a";
-    ctx.beginPath();
-    ctx.arc(-4, 8, 1.7, 0, Math.PI * 2);
-    ctx.arc(4, 8, 1.7, 0, Math.PI * 2);
-    ctx.fill();
-    return;
-  }
-
-  ctx.beginPath();
-  ctx.ellipse(0, 7, 13, 8, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  if (animal === "rabbit") {
-    ctx.fillStyle = "#ef8eaa";
-  } else if (animal === "frog") {
-    ctx.strokeStyle = "#315b42";
-    ctx.beginPath();
-    ctx.arc(0, 4, 9, 0.15, Math.PI - 0.15);
-    ctx.stroke();
-    return;
-  } else {
-    ctx.fillStyle = "#3a3040";
-  }
-
-  ctx.beginPath();
-  ctx.moveTo(-4, 3);
-  ctx.lineTo(4, 3);
-  ctx.lineTo(0, 7);
-  ctx.closePath();
-  ctx.fill();
-  ctx.strokeStyle = "#3a3040";
-  ctx.lineWidth = 1.5;
-  ctx.beginPath();
-  ctx.moveTo(0, 7);
-  ctx.quadraticCurveTo(-4, 11, -8, 9);
-  ctx.moveTo(0, 7);
-  ctx.quadraticCurveTo(4, 11, 8, 9);
+  ctx.restore();
+  ctx.save();
+  ctx.shadowColor = brick.color;
+  ctx.shadowBlur = damaged ? 6 : 12;
+  ctx.lineWidth = damaged ? 2.5 : 1.5;
+  ctx.strokeStyle = damaged ? "rgba(255, 88, 125, 0.95)" : "rgba(255,255,255,0.72)";
+  roundedRect(brick.x, brick.y, brick.width, brick.height, 10);
   ctx.stroke();
-
-  if (animal === "cat") {
-    ctx.lineWidth = 1.2;
-    ctx.beginPath();
-    ctx.moveTo(-9, 6);
-    ctx.lineTo(-23, 3);
-    ctx.moveTo(-9, 9);
-    ctx.lineTo(-23, 11);
-    ctx.moveTo(9, 6);
-    ctx.lineTo(23, 3);
-    ctx.moveTo(9, 9);
-    ctx.lineTo(23, 11);
-    ctx.stroke();
-  }
+  ctx.restore();
 }
 
 function drawPaddle() {
@@ -735,10 +636,34 @@ resetPaddleAndBall();
 resizeCanvas();
 requestAnimationFrame(loop);
 
+function setConnectionStatus(label, stateName) {
+  ui.connection.textContent = label;
+  ui.connection.dataset.state = stateName;
+}
+
+function updateConnectionStatus() {
+  setConnectionStatus(navigator.onLine ? "オンライン" : "オフライン", navigator.onLine ? "online" : "offline");
+}
+
+window.addEventListener("online", updateConnectionStatus);
+window.addEventListener("offline", updateConnectionStatus);
+updateConnectionStatus();
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js").catch(() => {
-      announce("オフライン機能を準備できませんでした。");
-    });
+    navigator.serviceWorker.register("./sw.js")
+      .then((registration) => {
+        registration.addEventListener("updatefound", () => {
+          setConnectionStatus("更新中", "updating");
+          const worker = registration.installing;
+          worker?.addEventListener("statechange", () => {
+            if (worker.state === "activated") updateConnectionStatus();
+          });
+        });
+      })
+      .catch(() => {
+        setConnectionStatus("オフライン準備失敗", "error");
+        announce("オフライン機能を準備できませんでした。");
+      });
   });
 }

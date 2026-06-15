@@ -58,6 +58,38 @@ button {
   justify-content: space-between;
 }
 
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.connection-status {
+  margin: 0;
+  padding: 5px 9px;
+  border: 1px solid rgba(81, 231, 255, 0.3);
+  border-radius: 999px;
+  color: var(--cyan);
+  background: rgba(81, 231, 255, 0.08);
+  font-size: 0.58rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.connection-status[data-state="offline"],
+.connection-status[data-state="error"] {
+  color: #ffadbd;
+  border-color: rgba(255, 93, 139, 0.4);
+  background: rgba(255, 93, 139, 0.1);
+}
+
+.connection-status[data-state="updating"] {
+  color: #ffe08a;
+  border-color: rgba(255, 224, 138, 0.4);
+  background: rgba(255, 224, 138, 0.08);
+}
+
 .brand {
   display: flex;
   align-items: center;
