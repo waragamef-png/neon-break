@@ -8,11 +8,11 @@
 | --- | --- | --- |
 | Git | 合格 | `git version 2.53.0.windows.3` |
 | GitHub CLI | 未完了 | `gh`が未導入 |
-| GitHub認証 | 未確認 | `gh`未導入のため`gh auth status`を実行不可 |
+| GitHub認証 | 合格 | Git Credential Managerで`waragamef-png`を確認 |
 | リポジトリ取得 | 合格 | `origin`は`waragamef-png/neon-break`、`main`を取得 |
 | 公開URL | 合格 | HTTPSでHTTP 200 |
-| 公開内容 | 合格 | 主要4ファイルが取得した`main`と一致 |
-| 人物顔ブロック | ローカル更新済み | AI生成した架空の成人アイドル8人。未公開 |
+| 公開内容 | 合格 | 主要ファイルが取得した`main`と一致 |
+| 人物顔ブロック | 公開済み | AI生成した架空の成人アイドル8人 |
 | Manifest | 合格 | UTF-8、有効なJSON、`display: standalone` |
 | Service Worker | 合格 | APP_SHELL、旧キャッシュ削除、`neon-break-v3`を確認 |
 | オフライン | 合格 | Chromeでサーバー停止後の再起動に成功 |
@@ -24,9 +24,8 @@
 ## 公開版
 
 - URL: https://waragamef-png.github.io/neon-break/
-- 確認コミット: `be34514d39fab87641f5221e7ad133e36944bfa0`
-- 公開中のService Workerキャッシュ: `neon-break-v2`
-- ローカル更新後のService Workerキャッシュ: `neon-break-v3`
+- 人物顔版コミット: `7d022d3d524d7310cd57011284b3e60fedea9935`
+- 公開中のService Workerキャッシュ: `neon-break-v3`
 - APP_SHELLの全URL: HTTP 200
 
 ## PWA・オフライン設計
