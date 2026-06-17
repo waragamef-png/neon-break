@@ -1,0 +1,19 @@
+{
+  "name": "朝のニュースブリーフィング",
+  "short_name": "朝ニュース",
+  "description": "毎朝7時更新の日本語ニュースブリーフィング",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f6f7f9",
+  "theme_color": "#0068b7",
+  "lang": "ja",
+  "icons": [
+    {
+      "src": "./icons/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
