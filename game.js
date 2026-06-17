@@ -29,9 +29,9 @@ const ui = {
 const WORLD = { width: 720, height: 1080 };
 const COLORS = ["#51e7ff", "#6d9cff", "#9b7bff", "#ff5dba", "#ff9c66"];
 const BRICK_TYPES = [
+  { id: "idol", label: "アイドル" },
   { id: "classic", label: "ブロック" },
-  { id: "animal", label: "動物" },
-  { id: "idol", label: "アイドル" }
+  { id: "animal", label: "動物" }
 ];
 const ANIMALS = ["cat", "dog", "bear", "rabbit", "panda", "fox", "frog", "pig"];
 const IDOL_COUNT = 8;

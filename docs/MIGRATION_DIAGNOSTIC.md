@@ -12,9 +12,9 @@
 | リポジトリ取得 | 合格 | `origin`は`waragamef-png/neon-break`、`main`を取得 |
 | 公開URL | 合格 | HTTPSでHTTP 200 |
 | 公開内容 | 合格 | 主要ファイルが取得した`main`と一致 |
-| ブロック切り替え | 公開対象 | 通常、動物、アイドルをレベル順に循環 |
+| ブロック切り替え | 公開対象 | アイドル、通常、動物をレベル順に循環 |
 | Manifest | 合格 | UTF-8、有効なJSON、`display: standalone` |
-| Service Worker | 合格 | APP_SHELL、旧キャッシュ削除、`neon-break-v4`を確認 |
+| Service Worker | 合格 | APP_SHELL、旧キャッシュ削除、`neon-break-v5`を確認 |
 | オフライン | 合格 | Chromeでサーバー停止後の再起動に成功 |
 | 状態表示 | 合格 | オンライン、オフライン、更新中、準備失敗を表示 |
 | 保存 | 合格 | ハイスコアと効果音設定のみ`localStorage` |
@@ -25,7 +25,7 @@
 
 - URL: https://waragamef-png.github.io/neon-break/
 - 人物顔版コミット: `7d022d3d524d7310cd57011284b3e60fedea9935`
-- 公開対象のService Workerキャッシュ: `neon-break-v4`
+- 公開対象のService Workerキャッシュ: `neon-break-v5`
 - APP_SHELLの全URL: HTTP 200
 
 ## PWA・オフライン設計
